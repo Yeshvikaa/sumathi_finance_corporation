@@ -1,0 +1,103 @@
+{% extends "manage/base_manage.html" %}
+{% block title %}{{ app.ref_no }} Review · {{ site.company_name }}{% endblock %}
+{% block content %}
+<div class="wrap">
+  <a href="{% url 'manage_applications' %}" class="back-link">← All applications</a>
+  <div class="grid2 mt" style="align-items:start">
+    <div>
+      <div class="card">
+        <div class="flex-between">
+          <h1 style="font-size:1.25rem;margin:0">{{ app.ref_no }}</h1>
+          <span class="badge {{ app.get_status_badge_class }}">{{ app.get_status_display }}</span>
+        </div>
+        <hr>
+        <dl class="dl-grid">
+          <dt>Full name</dt><dd>{{ app.full_name }}</dd>
+          <dt>Mobile</dt><dd>{{ app.mobile }}</dd>
+          {% if app.email %}<dt>Email</dt><dd>{{ app.email }}</dd>{% endif %}
+          <dt>Applicant user</dt><dd>{{ app.applicant.username }} ({{ app.applicant.email }})</dd>
+          <dt>Address</dt><dd>{{ app.residential_address }}</dd>
+          <dt>Area / Pincode</dt><dd>{{ app.area }} {{ app.pincode }}</dd>
+          {% if app.designation %}<dt>Occupation</dt><dd>{{ app.designation }}</dd>{% endif %}
+          {% if app.company_name %}<dt>Company</dt><dd>{{ app.company_name }}</dd>{% endif %}
+          <dt>Customer type</dt><dd>{{ app.get_customer_type_display }}</dd>
+          {% if app.ref_name %}<dt>Reference</dt><dd>{{ app.ref_name }} ({{ app.ref_relationship }}) {{ app.ref_mobile }}</dd>{% endif %}
+          {% if app.cheque_amount %}<dt>Cheque amount</dt><dd>₹{{ app.cheque_amount }}</dd>{% endif %}
+          {% if app.cheque_details %}<dt>Cheque details</dt><dd>{{ app.cheque_details }}</dd>{% endif %}
+          <dt>Submitted</dt><dd>{{ app.submitted_at|date:"d M Y, H:i"|default:"Not yet submitted" }}</dd>
+          <dt>Assigned to</dt><dd>{{ app.assigned_to.get_full_name|default:"— Unassigned —" }}</dd>
+        </dl>
+      </div>
+
+      {% if documents %}
+      <div class="card mt">
+        <h2 class="sec">Documents</h2>
+        {% for doc in documents %}
+        <div class="doc-row">
+          <span>{{ doc.get_doc_type_display }}</span>
+          <a href="{% url 'serve_document' doc.pk %}" target="_blank" class="btn sm">View</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="card mt">
+        <h2 class="sec">Actions</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="field">
+            <label>Note / Reason (optional for approve, required for reject/request info)</label>
+            <textarea name="note" rows="3" class="wide-input"></textarea>
+          </div>
+          <div class="action-btns">
+            {% if not app.assigned_to %}
+              <button name="action" value="claim" class="btn sm ghost">📌 Claim Application</button>
+            {% endif %}
+            <button name="action" value="under_review" class="btn sm ghost">Mark Under Review</button>
+            <button name="action" value="request_info" class="btn sm amber-btn">Request More Info</button>
+            {% if is_manager %}
+              <button name="action" value="reject" class="btn sm danger-btn">Reject</button>
+              <button name="action" value="approve" class="btn sm green-btn">Approve ✓</button>
+            {% endif %}
+          </div>
+        </form>
+
+        {% if is_manager and staff_list %}
+        <hr style="margin:1.2rem 0">
+        <h3 style="font-size:1rem;margin:0 0 .6rem">Assign to staff member</h3>
+        <form method="post" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
+          {% csrf_token %}
+          <select name="assign_to_id" class="input-sm" style="min-width:180px">
+            <option value="">— Select staff —</option>
+            {% for uid, name, sfcid in staff_list %}
+            <option value="{{ uid }}" {% if app.assigned_to.pk == uid %}selected{% endif %}>{{ name }} ({{ sfcid }})</option>
+            {% endfor %}
+          </select>
+          <button name="action" value="assign" class="btn sm">Assign →</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Status History</h2>
+      {% if history %}
+      <ul class="timeline">
+        {% for h in history %}
+        <li class="tl-item">
+          <span class="tl-dot {{ h.to_status }}"></span>
+          <div>
+            <p><b>{{ h.to_status }}</b></p>
+            {% if h.note %}<p class="muted small">{{ h.note }}</p>{% endif %}
+            <p class="muted small">{{ h.changed_at|date:"d M Y, H:i" }}{% if h.changed_by %} · {{ h.changed_by.get_full_name|default:h.changed_by.username }}{% endif %}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">No history yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

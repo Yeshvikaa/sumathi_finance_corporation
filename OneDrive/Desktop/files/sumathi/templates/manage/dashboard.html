@@ -1,0 +1,77 @@
+{% extends "manage/base_manage.html" %}
+{% block content %}
+<h1>Dashboard</h1>
+
+{# ── GPS Tracking Card ─────────────────────────────────────────────────── #}
+<div class="card track-card" id="track-card">
+  <div class="track-header">
+    <span class="track-title">📍 My Location Tracking</span>
+    <span class="track-badge" id="track-badge">Idle</span>
+  </div>
+  <p class="track-note muted">
+    Tracking stays active while you browse within this management panel.
+    It will stop when you close the browser tab or click Stop.
+    Your location is shared only with managers.
+  </p>
+  <div class="track-controls">
+    <button class="btn gold" id="track-btn" onclick="startTracking()">▶ Start Tracking</button>
+    <span class="track-status muted" id="track-status">Not tracking.</span>
+  </div>
+  <div class="track-info" id="track-info" style="display:none">
+    <span>Last updated: <b id="track-time">—</b></span>
+    <span>Accuracy: <b id="track-acc">—</b> m</span>
+    <a id="track-maps" href="#" target="_blank" rel="noopener" class="btn sm" style="display:none">Open in Maps</a>
+  </div>
+  <div class="flash error" id="track-error" style="display:none"></div>
+  <div class="flash" id="track-warn" style="display:none">
+    ⚠️ <strong>GPS unavailable on this connection.</strong>
+    Browser geolocation requires either <code>localhost</code> or an <strong>HTTPS</strong> connection.
+    Ask your administrator to enable HTTPS to use live tracking outside this device.
+  </div>
+</div>
+
+<script>
+// Sync the dashboard UI with the shared tracking state from base_manage
+(function () {
+  "use strict";
+  var NS = "__sfcTrack";
+  var state = window[NS];
+  if (!state) return;
+
+  var btn  = document.getElementById("track-btn");
+  var badge = document.getElementById("track-badge");
+  var statusEl = document.getElementById("track-status");
+
+  // Check if geolocation is available
+  if (!navigator.geolocation) {
+    var warnEl = document.getElementById("track-warn");
+    if (warnEl) warnEl.style.display = "block";
+    if (btn) { btn.disabled = true; btn.textContent = "GPS Not Available"; }
+  }
+
+  // Reflect current state
+  if (state.tracking) {
+    if (btn) { btn.textContent = "⏹ Stop Tracking"; btn.onclick = window.stopTracking; }
+    if (badge) { badge.textContent = "Tracking"; badge.className = "track-badge badge paid"; }
+    if (statusEl) { statusEl.textContent = "Tracking — sending every 30 s."; }
+    var info = document.getElementById("track-info");
+    if (info && state.lastPos) { info.style.display = "flex"; }
+  }
+}());
+</script>
+
+{# ── KPI Cards ──────────────────────────────────────────────────────────── #}
+<div class="kpis">
+<div class="kpi ok"><span>Collected (all time)</span><b>₹{{ collected }}</b></div>
+<div class="kpi"><span>Collected this month</span><b>₹{{ collected_month }}</b></div>
+<div class="kpi warn"><span>Yet to pay</span><b>₹{{ pending }}</b></div>
+<a class="kpi bad" href="{% url 'installments' %}?f=overdue"><span>Overdue ({{ overdue_count }})</span><b>₹{{ overdue }}</b></a>
+</div>
+<p class="muted">{{ customers_count }} customers · {{ today_count }} due today · {{ new_enquiries }} new website enquiries</p>
+<div class="bar"><a class="btn gold" href="{% url 'customer_new' %}">+ New customer</a> <a class="btn" href="{% url 'reminders' %}">Send reminders</a></div>
+<div class="card"><h2>Due within 7 days / overdue</h2><div class="scroll"><table>
+<tr><th>Customer</th><th>#</th><th>Due</th><th>Balance</th><th>Status</th><th>Receive payment</th></tr>
+{% include "manage/_rows.html" with items=due_soon %}</table></div></div>
+<div class="card"><h2>Recent receipts</h2><table>
+{% for p in recent %}<tr><td><a href="{% url 'receipt' p.id %}">{{ p.receipt_no }}</a></td><td>{{ p.installment.loan.customer.name }}</td><td>₹{{ p.amount }}</td><td>{{ p.get_method_display }}</td><td>{{ p.paid_on|date:"d M" }}</td></tr>{% empty %}<tr><td class="empty">No payments yet.</td></tr>{% endfor %}</table></div>
+{% endblock %}

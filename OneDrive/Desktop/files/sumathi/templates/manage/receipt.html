@@ -1,0 +1,7 @@
+{% load static %}<!doctype html><html><head><meta charset="utf-8"><title>{{ p.receipt_no }}</title><link rel="stylesheet" href="{% static 'css/site.css' %}"></head>
+<body class="rcpt"><div class="slip"><h2>{{ site.company_name }}</h2><p>{{ site.address|linebreaksbr }} · {{ site.phone }}</p><hr>
+<h3>Payment receipt {{ p.receipt_no }}</h3>
+<table><tr><td>Date</td><td>{{ p.paid_on|date:"d M Y" }}</td></tr><tr><td>Received from</td><td>{{ p.installment.loan.customer.name }}</td></tr>
+<tr><td>Loan / installment</td><td>#{{ p.installment.loan.id }} / {{ p.installment.number }}</td></tr><tr><td>Mode</td><td>{{ p.get_method_display }}</td></tr>
+<tr><td><b>Amount</b></td><td><b>₹{{ p.amount }}</b></td></tr><tr><td>Loan balance after</td><td>₹{{ p.installment.loan.balance }}</td></tr></table>
+<p class="muted">Thank you. Authorised signature: ____________</p><button class="btn gold noprint" onclick="print()">Print</button></div></body></html>

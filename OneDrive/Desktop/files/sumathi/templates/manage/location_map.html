@@ -1,0 +1,197 @@
+{% extends "manage/base_manage.html" %}
+{% block title %}Staff Locations · {{ site.company_name }}{% endblock %}
+
+{% block head %}
+{# Leaflet CSS + JS from CDN — free, no API key required #}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN2GqnI=" crossorigin></script>
+<style>
+  #location-map { height: 480px; border-radius: 14px; border: 1px solid var(--line); }
+  .loc-table th, .loc-table td { padding: 10px 12px; }
+  .refresh-note { font-size:.85rem; color:var(--mut); margin:0; }
+  .no-locs { text-align:center; padding:60px 20px; color:var(--mut); }
+  .no-locs span { font-size:3rem; display:block; margin-bottom:12px; }
+  #map-error { display:none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+  <h1 style="margin:0">📍 Staff Locations</h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    <p class="refresh-note">Showing locations from the last 24 hours</p>
+    <span class="badge partial" id="refresh-badge">Auto-refresh ON</span>
+  </div>
+</div>
+
+<div class="flash error" id="map-error"></div>
+
+<div class="card" style="padding:14px">
+  <div id="location-map"></div>
+</div>
+
+<div class="card" id="loc-table-card">
+  <h2>All staff – last known positions</h2>
+  <div class="scroll">
+    <table class="loc-table" id="loc-table">
+      <thead>
+        <tr>
+          <th>Staff Member</th><th>SFC ID</th><th>Status</th>
+          <th>Latitude</th><th>Longitude</th><th>Accuracy</th>
+          <th>Last Updated</th><th>Open</th>
+        </tr>
+      </thead>
+      <tbody id="loc-tbody">
+        <tr><td colspan="8" style="text-align:center;padding:2rem;color:#888">Loading locations…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card no-locs" id="no-locs-card" style="display:none">
+  <span>🗺️</span>
+  <p>No staff locations recorded in the last 24 hours.</p>
+  <p class="muted">Staff members can start sharing their location from the
+    <a href="{% url 'dashboard' %}">Dashboard</a> page.</p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const DATA_URL  = "{% url 'location_data' %}";
+  const INTERVAL  = 60000; // 60 s
+
+  /* ── Initialise Leaflet map ── */
+  const map = L.map("location-map");
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Start at India if no locations yet
+  map.setView([20.5937, 78.9629], 5);
+
+  const markers   = {};  // keyed by staff name
+  const circles   = {};
+  const tableBody = document.getElementById("loc-tbody");
+  const noLocsCard = document.getElementById("no-locs-card");
+  const locTableCard = document.getElementById("loc-table-card");
+  const errEl     = document.getElementById("map-error");
+  const badge     = document.getElementById("refresh-badge");
+
+  function showError(msg) {
+    errEl.textContent = "⚠️ " + msg;
+    errEl.style.display = "block";
+  }
+  function clearError() { errEl.style.display = "none"; }
+
+  function makeIcon(isTracking) {
+    const bg = isTracking ? "#0f3d2e" : "#6b7a73";
+    return L.divIcon({
+      html: `<div style="background:${bg};border:3px solid #fff;border-radius:50% 50% 50% 0;width:26px;height:26px;transform:rotate(-45deg);box-shadow:0 2px 6px #0006;"></div>`,
+      className: "",
+      iconSize: [26, 26],
+      iconAnchor: [13, 26],
+      popupAnchor: [0, -28],
+    });
+  }
+
+  function makePopup(loc) {
+    const statusLabel = loc.is_tracking ? "🟢 Live" : "⬤ Stopped";
+    return `<div style="min-width:200px;font-family:Inter,sans-serif;font-size:.92rem">
+      <b style="font-size:1rem">${loc.name}</b><br>
+      ${loc.sfc_id ? `<span style="color:#6b7a73;font-size:.82rem">${loc.sfc_id}</span><br>` : ""}
+      ${statusLabel}<br>
+      <span style="color:#6b7a73;font-size:.82rem">${loc.timestamp}</span><br>
+      <span style="color:#6b7a73;font-size:.82rem">Accuracy: ±${Math.round(loc.accuracy)} m</span><br>
+      <a href="${loc.maps_url}" target="_blank" rel="noopener"
+         style="color:#17543f;font-weight:600;text-decoration:none">Open in Google Maps ↗</a>
+    </div>`;
+  }
+
+  function updateMap(locations) {
+    clearError();
+    const bounds = [];
+
+    locations.forEach(function(loc) {
+      const key = loc.name + "_" + (loc.sfc_id || "");
+      const latlng = [loc.lat, loc.lon];
+      bounds.push(latlng);
+
+      if (markers[key]) {
+        // Update existing marker
+        markers[key].setLatLng(latlng).setIcon(makeIcon(loc.is_tracking));
+        markers[key].getPopup().setContent(makePopup(loc));
+        if (circles[key]) {
+          circles[key].setLatLng(latlng).setRadius(loc.accuracy);
+        }
+      } else {
+        // Create new marker
+        if (loc.accuracy > 0) {
+          circles[key] = L.circle(latlng, {
+            radius: loc.accuracy,
+            color: loc.is_tracking ? "#1b7a4b" : "#b3261e",
+            fillColor: loc.is_tracking ? "#1b7a4b" : "#b3261e",
+            fillOpacity: 0.08, weight: 1.5,
+          }).addTo(map);
+        }
+        markers[key] = L.marker(latlng, { icon: makeIcon(loc.is_tracking) })
+          .addTo(map)
+          .bindPopup(makePopup(loc));
+      }
+    });
+
+    // Fit bounds if we have markers
+    if (bounds.length === 1) {
+      map.setView(bounds[0], 15);
+    } else if (bounds.length > 1) {
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }
+
+    // Update table
+    if (locations.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#888">No staff locations in the last 24 hours.</td></tr>';
+      noLocsCard.style.display = "block";
+      locTableCard.style.display = "none";
+    } else {
+      noLocsCard.style.display = "none";
+      locTableCard.style.display = "block";
+      tableBody.innerHTML = locations.map(function(loc) {
+        const statusBadge = loc.is_tracking
+          ? '<span class="badge paid">● Live</span>'
+          : '<span class="badge upcoming">Stopped</span>';
+        return `<tr>
+          <td><b>${loc.name}</b></td>
+          <td>${loc.sfc_id || "—"}</td>
+          <td>${statusBadge}</td>
+          <td>${loc.lat.toFixed(6)}</td>
+          <td>${loc.lon.toFixed(6)}</td>
+          <td>± ${Math.round(loc.accuracy)} m</td>
+          <td>${loc.timestamp}</td>
+          <td><a href="${loc.maps_url}" target="_blank" rel="noopener" class="btn sm">Maps ↗</a></td>
+        </tr>`;
+      }).join("");
+    }
+  }
+
+  function fetchLocations() {
+    fetch(DATA_URL, { credentials: "same-origin" })
+      .then(function(r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function(data) { updateMap(data.locations || []); })
+      .catch(function(e) { showError("Failed to load locations: " + e.message); });
+  }
+
+  // Initial load
+  fetchLocations();
+
+  // Auto-refresh every 60 s using AJAX (no full page reload)
+  setInterval(fetchLocations, INTERVAL);
+}());
+</script>
+{% endblock %}

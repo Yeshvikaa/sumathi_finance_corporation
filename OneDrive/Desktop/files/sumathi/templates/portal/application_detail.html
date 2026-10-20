@@ -1,0 +1,86 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}{{ app.ref_no }} · {{ site.company_name }}{% endblock %}
+{% block content %}
+<section class="wrap">
+  <a href="{% url 'my_applications' %}" class="back-link">← My applications</a>
+
+  <div class="grid2 mt" style="align-items:start">
+    <div>
+      <div class="card">
+        <div class="flex-between">
+          <h1 style="font-size:1.25rem;margin:0">{{ app.ref_no }}</h1>
+          <span class="badge {{ app.get_status_badge_class }}">{{ app.get_status_display }}</span>
+        </div>
+        <hr>
+        <dl class="dl-grid">
+          <dt>Full name</dt><dd>{{ app.full_name }}</dd>
+          <dt>Mobile</dt><dd>{{ app.mobile }}</dd>
+          {% if app.email %}<dt>Email</dt><dd>{{ app.email }}</dd>{% endif %}
+          <dt>Address</dt><dd>{{ app.residential_address }}</dd>
+          <dt>Pincode</dt><dd>{{ app.pincode }}</dd>
+          {% if app.designation %}<dt>Occupation</dt><dd>{{ app.designation }}</dd>{% endif %}
+          {% if app.submitted_at %}<dt>Submitted</dt><dd>{{ app.submitted_at|date:"d M Y, H:i" }}</dd>{% endif %}
+        </dl>
+        {% if app.review_notes %}
+        <div class="flash warning" style="margin-top:1rem">
+          <b>Manager note:</b> {{ app.review_notes }}
+        </div>
+        {% endif %}
+        {% if app.rejection_reason %}
+        <div class="flash error" style="margin-top:1rem">
+          <b>Rejection reason:</b> {{ app.rejection_reason }}
+        </div>
+        {% endif %}
+      </div>
+
+      {% if documents %}
+      <div class="card mt">
+        <h2 class="sec">Documents</h2>
+        {% for doc in documents %}
+        <div class="doc-row">
+          <span>{{ doc.get_doc_type_display }}</span>
+          <a href="{% url 'serve_document' doc.pk %}" target="_blank" class="btn sm">View</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if can_upload %}
+      <div class="card mt">
+        <h2 class="sec">Upload Document</h2>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% for f in doc_form %}
+            <div class="field">
+              <label>{{ f.label }}</label>{{ f }}
+              {% if f.errors %}<p class="field-err">{{ f.errors|join:", " }}</p>{% endif %}
+            </div>
+          {% endfor %}
+          <button type="submit" class="btn">Upload</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Status History</h2>
+      {% if history %}
+      <ul class="timeline">
+        {% for h in history %}
+        <li class="tl-item">
+          <span class="tl-dot {{ h.to_status }}"></span>
+          <div>
+            <p><b>{{ h.get_to_status_display|default:h.to_status }}</b></p>
+            {% if h.note %}<p class="muted small">{{ h.note }}</p>{% endif %}
+            <p class="muted small">{{ h.changed_at|date:"d M Y, H:i" }}{% if h.changed_by %} by {{ h.changed_by.get_full_name|default:h.changed_by.username }}{% endif %}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">No history yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

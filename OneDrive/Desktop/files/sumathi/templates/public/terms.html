@@ -1,0 +1,38 @@
+{% extends "public/base_public.html" %}
+{% block title %}Terms & Conditions · {{ site.company_name }}{% endblock %}
+{% block content %}
+<section class="hero sm">
+  <div class="wrap hero-in">
+    <h1>Terms &amp; Conditions</h1>
+    <p class="lead">Last updated: January 2025</p>
+  </div>
+</section>
+<div class="legal wrap">
+  <h2>1. Acceptance of Terms</h2>
+  <p>By accessing the {{ site.company_name }} customer portal or applying for any loan product, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services.</p>
+
+  <h2>2. Loan Applications</h2>
+  <p>Submitting an application through our portal does not guarantee loan approval. All applications are subject to review and approval at our sole discretion. We reserve the right to request additional documents or reject any application without providing a reason.</p>
+
+  <h2>3. Information Accuracy</h2>
+  <p>You are responsible for providing accurate and truthful information in your application. Submitting false information is grounds for immediate rejection and may result in legal action.</p>
+
+  <h2>4. Repayments</h2>
+  <p>Once a loan is approved, you are bound to repay the agreed installments on the scheduled due dates. Late payments may attract additional charges as specified in your individual loan agreement.</p>
+
+  <h2>5. Digital Payment Claims</h2>
+  <p>Payment claims submitted via the portal require verification by our staff. A payment is considered received only after it has been verified by an authorised staff member. Do not assume a claim is processed until you receive confirmation.</p>
+
+  <h2>6. Account Security</h2>
+  <p>You are responsible for maintaining the security of your portal login credentials. Do not share your username or password with others. Notify us immediately if you suspect unauthorised access to your account.</p>
+
+  <h2>7. Amendments</h2>
+  <p>We reserve the right to amend these Terms at any time. Continued use of our services after changes constitutes acceptance of the revised Terms.</p>
+
+  <h2>8. Governing Law</h2>
+  <p>These Terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of courts in our registered business location.</p>
+
+  <h2>9. Contact</h2>
+  <p>Questions about these Terms? Please contact us at <a href="mailto:{{ site.email }}">{{ site.email }}</a>.</p>
+</div>
+{% endblock %}

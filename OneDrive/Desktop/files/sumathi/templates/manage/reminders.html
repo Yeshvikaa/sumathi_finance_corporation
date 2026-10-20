@@ -1,0 +1,5 @@
+{% extends "manage/base_manage.html" %}
+{% block content %}<h1>Reminders</h1>
+<p class="muted">Due in 2 days or overdue. Tap WhatsApp to send instantly; automatic SMS runs daily via <code>python manage.py send_reminders</code>.</p>
+<div class="card scroll"><table><tr><th>Customer</th><th>Due</th><th>Balance</th><th>SMS today</th><th></th></tr>
+{% for i in items %}<tr><td>{{ i.loan.customer.name }}<br><small>{{ i.loan.customer.phone }}</small></td><td>{{ i.due_date|date:"d M" }} <span class="badge {{ i.status }}">{{ i.status|title }}</span></td><td>₹{{ i.balance }}</td><td>{% if i.reminder_sent_on %}Sent {{ i.reminder_sent_on|date:"d M" }}{% else %}–{% endif %}</td><td><a class="btn sm" target="_blank" rel="noopener" href="{{ i.wa_link }}">WhatsApp</a> <a class="btn sm" href="tel:{{ i.loan.customer.phone }}">Call</a></td></tr>{% empty %}<tr><td colspan="5" class="empty">No reminders due 🎉</td></tr>{% endfor %}</table></div>{% endblock %}

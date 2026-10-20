@@ -1,0 +1,5 @@
+{% extends "public/base_public.html" %}
+{% block title %}Contact · {{ site.company_name }}{% endblock %}
+{% block content %}<section class="wrap page grid2"><div>
+<h1>Contact us</h1><div class="card"><h3>Send a message</h3><form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn gold">Send</button></form></div></div>
+<div><div class="card"><h3>Details</h3><p>{{ site.address|linebreaksbr }}</p><p>{{ site.phone }}<br>{{ site.email }}</p>{% for l in site.hours_list %}<p class="row">{{ l }}</p>{% endfor %}</div>{% include "public/_map.html" %}</div></section>{% endblock %}

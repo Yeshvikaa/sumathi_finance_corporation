@@ -1,0 +1,79 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}My Portal · {{ site.company_name }}{% endblock %}
+{% block content %}
+<section class="wrap">
+  <div class="portal-header">
+    <div>
+      <h1>Welcome, {{ request.user.get_full_name|default:request.user.username }}</h1>
+      <p class="muted">{{ request.user.profile.sfc_id }} &mdash; Customer Portal</p>
+    </div>
+    <a href="{% url 'apply_loan' %}" class="btn gold">+ Apply for Loan</a>
+  </div>
+
+  {% if customer %}
+  <div class="grid3 mt">
+    <div class="card stat-card">
+      <span class="stat-label">Total Borrowed</span>
+      <b class="stat-val">₹{{ total_borrowed|floatformat:0 }}</b>
+    </div>
+    <div class="card stat-card">
+      <span class="stat-label">Total Paid</span>
+      <b class="stat-val green">₹{{ total_paid|floatformat:0 }}</b>
+    </div>
+    <div class="card stat-card">
+      <span class="stat-label">Balance Due</span>
+      <b class="stat-val {% if total_balance > 0 %}amber{% else %}green{% endif %}">₹{{ total_balance|floatformat:0 }}</b>
+    </div>
+  </div>
+
+  {% if loans %}
+  <div class="card mt">
+    <h2 class="sec">Active Loans</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Loan</th><th>Principal</th><th>Total Payable</th><th>Paid</th><th>Balance</th></tr></thead>
+        <tbody>
+        {% for loan in loans %}
+          <tr>
+            <td>Loan #{{ loan.pk }}</td>
+            <td>₹{{ loan.principal|floatformat:0 }}</td>
+            <td>₹{{ loan.total_payable|floatformat:0 }}</td>
+            <td>₹{{ loan.paid|floatformat:0 }}</td>
+            <td><b>₹{{ loan.balance|floatformat:0 }}</b></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
+
+  <div class="card mt">
+    <div class="flex-between">
+      <h2 class="sec" style="margin:0">My Applications</h2>
+      <a href="{% url 'my_applications' %}">View all →</a>
+    </div>
+    {% if apps %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ref No</th><th>Name</th><th>Status</th><th>Submitted</th><th></th></tr></thead>
+        <tbody>
+        {% for app in apps %}
+          <tr>
+            <td>{{ app.ref_no }}</td>
+            <td>{{ app.full_name }}</td>
+            <td><span class="badge {{ app.get_status_badge_class }}">{{ app.get_status_display }}</span></td>
+            <td>{{ app.submitted_at|date:"d M Y"|default:"—" }}</td>
+            <td><a href="{% url 'application_detail' app.pk %}">View</a></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="muted" style="padding:1rem 0">No applications yet. <a href="{% url 'apply_loan' %}">Apply now →</a></p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

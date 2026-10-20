@@ -1,0 +1,36 @@
+{% extends "manage/base_manage.html" %}
+{% block title %}Staff Requests · {{ site.company_name }}{% endblock %}
+{% block content %}
+<div class="wrap">
+  <h1>Pending Staff Requests</h1>
+  <div class="card mt">
+    {% if pending %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Username</th><th>Full name</th><th>Email</th><th>Requested</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for p in pending %}
+          <tr>
+            <td>{{ p.user.username }}</td>
+            <td>{{ p.user.get_full_name|default:"—" }}</td>
+            <td>{{ p.user.email|default:"—" }}</td>
+            <td>{{ p.created|date:"d M Y" }}</td>
+            <td>
+              <form method="post" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="profile_id" value="{{ p.pk }}">
+                <button name="action" value="approve" class="btn sm green-btn">Approve</button>
+                <button name="action" value="reject" class="btn sm danger-btn" onclick="return confirm('Reject this request?')">Reject</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="muted" style="padding:2rem;text-align:center">No pending staff requests.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

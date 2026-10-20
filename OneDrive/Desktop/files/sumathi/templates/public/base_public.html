@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block head %}<script type="application/ld+json">{"@context":"https://schema.org","@type":"FinancialService","name":"{{ site.company_name|escapejs }}","telephone":"{{ site.phone|escapejs }}","email":"{{ site.email|escapejs }}","address":"{{ site.address|escapejs }}","url":"{{ request.build_absolute_uri }}"}</script>{% endblock %}
+{% block body %}
+<header class="nav"><div class="wrap nav-in">
+  <a class="brand" href="{% url 'home' %}"><span class="mark">S</span>{{ site.company_name }}</a>
+  <nav>
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'about' %}">About</a>
+    <a href="{% url 'services' %}">Services</a>
+    <a href="{% url 'faq' %}">FAQ</a>
+    <a href="{% url 'gallery' %}">Gallery</a>
+    <a href="{% url 'portal_login' %}" class="btn sm">Customer Login</a>
+    <a href="{% url 'contact' %}" class="btn sm gold">Contact</a>
+  </nav>
+</div></header>
+{% if messages %}<div class="wrap">{% for m in messages %}<div class="flash {{ m.tags }}">{{ m }}</div>{% endfor %}</div>{% endif %}
+{% block content %}{% endblock %}
+<footer class="foot"><div class="wrap foot-in">
+  <div><b>{{ site.company_name }}</b><p>{{ site.tagline }}</p>
+    <p style="margin-top:8px"><a href="{% url 'portal_login' %}">Customer Portal →</a></p>
+  </div>
+  <div><b>Visit</b><p>{{ site.address|linebreaksbr }}</p></div>
+  <div><b>Office hours</b>{% for l in site.hours_list %}<p>{{ l }}</p>{% endfor %}</div>
+  <div><b>Quick links</b>
+    <p><a href="{% url 'services' %}">Services</a></p>
+    <p><a href="{% url 'faq' %}">FAQ</a></p>
+    <p><a href="{% url 'privacy' %}">Privacy Policy</a></p>
+    <p><a href="{% url 'terms' %}">Terms &amp; Conditions</a></p>
+    <p><a href="{% url 'disclaimer' %}">Disclaimer</a></p>
+  </div>
+</div>
+<div class="wrap copy">© {% now "Y" %} {{ site.company_name }} · <a href="{% url 'login' %}">Staff login</a></div></footer>
+{% endblock %}

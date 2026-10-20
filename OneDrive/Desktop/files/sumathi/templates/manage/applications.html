@@ -1,0 +1,58 @@
+{% extends "manage/base_manage.html" %}
+{% block title %}Applications · {{ site.company_name }}{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="flex-between" style="margin-bottom:1rem">
+    <h1>Loan Applications</h1>
+    {% if is_manager and unassigned_count %}
+    <span class="badge warn">{{ unassigned_count }} unassigned</span>
+    {% endif %}
+  </div>
+
+  {% if not is_manager %}
+  <div class="flash" style="margin-bottom:1rem">
+    💼 Showing applications assigned to you and unassigned applications. Click <b>Claim</b> on any unassigned application to take ownership.
+  </div>
+  {% endif %}
+
+  <form method="get" class="filter-row">
+    <input name="q" value="{{ q }}" placeholder="Search ref, name, phone…" class="input-sm">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for val, label in status_choices %}
+        <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn sm">Filter</button>
+    {% if q or status_filter %}<a href="{% url 'manage_applications' %}" class="btn sm ghost">Clear</a>{% endif %}
+  </form>
+  <div class="card mt">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ref No</th><th>Applicant</th><th>Mobile</th><th>Status</th><th>Submitted</th><th>Assigned</th><th></th></tr></thead>
+        <tbody>
+        {% for app in apps %}
+          <tr>
+            <td><b>{{ app.ref_no }}</b></td>
+            <td>{{ app.full_name }}</td>
+            <td>{{ app.mobile }}</td>
+            <td><span class="badge {{ app.get_status_badge_class }}">{{ app.get_status_display }}</span></td>
+            <td>{{ app.submitted_at|date:"d M Y"|default:"—" }}</td>
+            <td>
+              {% if app.assigned_to %}
+                {{ app.assigned_to.get_full_name|default:app.assigned_to.username }}
+              {% else %}
+                <span class="muted">— Unassigned —</span>
+              {% endif %}
+            </td>
+            <td><a href="{% url 'review_application' app.pk %}" class="btn sm">Review</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" style="text-align:center;padding:2rem;color:#888">No applications found.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,4 @@
+{% extends "public/base_public.html" %}
+{% block title %}Office Gallery · {{ site.company_name }}{% endblock %}
+{% block content %}<section class="wrap page"><h1>Our office</h1>
+<div class="gal">{% for i in images %}<figure><img src="{{ i.image.url }}" alt="{{ i.title|default:site.company_name }}" loading="lazy">{% if i.title %}<figcaption>{{ i.title }}</figcaption>{% endif %}</figure>{% empty %}<p>Photos coming soon.</p>{% endfor %}</div></section>{% endblock %}

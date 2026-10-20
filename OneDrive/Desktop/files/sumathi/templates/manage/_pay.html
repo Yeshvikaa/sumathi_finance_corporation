@@ -1,0 +1,5 @@
+<form method="post" action="{% url 'pay' i.id %}" class="payform">{% csrf_token %}
+<input type="hidden" name="next" value="{{ request.get_full_path }}">
+<input name="amount" type="number" step="0.01" min="0.01" max="{{ i.balance }}" value="{{ i.balance }}">
+<select name="method"><option value="cash">Cash</option><option value="upi">UPI</option><option value="bank">Bank</option><option value="cheque">Cheque</option></select>
+<button class="btn sm">Receive</button></form>

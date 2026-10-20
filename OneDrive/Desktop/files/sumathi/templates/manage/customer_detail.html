@@ -1,0 +1,9 @@
+{% extends "manage/base_manage.html" %}
+{% block content %}<h1>{{ c.name }}</h1>
+<p class="muted">{{ c.phone }}{% if c.alt_phone %} · {{ c.alt_phone }}{% endif %}{% if c.address %} · {{ c.address }}{% endif %}{% if c.id_note %} · {{ c.id_note }}{% endif %}</p>
+<div class="bar"><a class="btn gold" href="{% url 'loan_new' c.id %}">+ New loan</a></div>
+{% for l in c.loans.all %}<div class="card"><h2>Loan #{{ l.id }} · ₹{{ l.principal }} → ₹{{ l.total_payable }}</h2>
+<p class="muted">{{ l.tenure }} {{ l.get_frequency_display|lower }} installments from {{ l.start_date|date:"d M Y" }} · Paid ₹{{ l.paid }} · <b>Balance ₹{{ l.balance }}</b></p>
+<div class="scroll"><table><tr><th>#</th><th>Due</th><th>Amount</th><th>Paid</th><th>Status</th><th>Receive</th></tr>
+{% for i in l.installments.all %}<tr><td>{{ i.number }}</td><td>{{ i.due_date|date:"d M Y" }}</td><td>₹{{ i.amount }}</td><td>₹{{ i.paid_amount }}</td><td><span class="badge {{ i.status }}">{{ i.status|title }}</span></td><td>{% if not i.paid_on %}{% include "manage/_pay.html" %}{% endif %}</td></tr>{% endfor %}</table></div></div>
+{% empty %}<p class="empty">No loans yet.</p>{% endfor %}{% endblock %}

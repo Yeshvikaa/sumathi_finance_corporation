@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}Manage · {{ site.company_name }}{% endblock %}
+{% block body_class %}app{% endblock %}
+{% block body %}
+<header class="appbar"><b>{{ site.company_name }}</b>
+<nav>
+<a href="{% url 'dashboard' %}">Dashboard</a><a href="{% url 'customers' %}">Customers</a>
+<a href="{% url 'installments' %}">Payments</a><a href="{% url 'reminders' %}">Reminders</a>
+<a href="{% url 'enquiries' %}">Enquiries</a>
+<a href="{% url 'manage_applications' %}">Applications</a>
+<a href="{% url 'manage_staff_requests' %}">Staff Requests</a>
+<a href="{% url 'manage_payment_claims' %}">Claims</a>
+<a href="{% url 'location_map' %}">📍 Locations</a><a href="/admin/">Site editor</a>
+<span id="nav-track-badge" style="display:none;font-size:.75rem;padding:2px 7px;border-radius:20px;background:#1b7a4b;color:#fff">📍</span>
+<form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link" id="nav-logout-btn">Logout</button></form>
+</nav></header>
+<main class="appmain">
+{% for m in messages %}<div class="flash {{ m.tags }}">{{ m }}</div>{% endfor %}
+{% block content %}{% endblock %}
+</main>
+
+{# ── Persistent background location tracking service ─────────────────────── #}
+{# This script lives at the app-shell level so tracking continues across       #}
+{# internal page navigation. It does NOT restart if already running.           #}
+<script>
+(function () {
+  "use strict";
+
+  var SUBMIT_URL  = "{% url 'submit_location' %}";
+  var INTERVAL_MS = 30000;
+  var NS          = "__sfcTrack";   // window namespace key
+
+  // ── Already running? Do not create duplicate watchers. ──────────────────
+  if (window[NS]) return;
+
+  var state = {
+    watchId:    null,
+    intervalId: null,
+    lastPos:    null,
+    tracking:   false,
+  };
+  window[NS] = state;
+
+  function getCsrfToken() {
+    var m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : "";
+  }
+
+  function sendLocation(lat, lon, acc, isTracking) {
+    var csrf = getCsrfToken();
+    if (!csrf) return;
+    fetch(SUBMIT_URL, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
+      body: JSON.stringify({ latitude: lat, longitude: lon, accuracy: acc, is_tracking: isTracking }),
+    }).catch(function () { /* silent — network may be temporarily down */ });
+  }
+
+  function onPosition(pos) {
+    state.lastPos = pos;
+    if (state.tracking) {
+      sendLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, true);
+    }
+    // Update dashboard badge if present
+    var badge = document.getElementById("track-badge");
+    var timeEl = document.getElementById("track-time");
+    var accEl  = document.getElementById("track-acc");
+    var info   = document.getElementById("track-info");
+    var mapsEl = document.getElementById("track-maps");
+    var statusEl = document.getElementById("track-status");
+    if (badge)   { badge.textContent = "Tracking"; badge.className = "track-badge badge paid"; }
+    if (timeEl)  { timeEl.textContent = new Date().toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit",second:"2-digit"}); }
+    if (accEl)   { accEl.textContent  = Math.round(pos.coords.accuracy); }
+    if (mapsEl)  { mapsEl.href = "https://www.google.com/maps?q=" + pos.coords.latitude + "," + pos.coords.longitude; mapsEl.style.display = "inline-block"; }
+    if (info)    { info.style.display = "flex"; }
+    if (statusEl){ statusEl.textContent = "Tracking — sending every 30 s."; }
+    var navBadge = document.getElementById("nav-track-badge");
+    if (navBadge) navBadge.style.display = "inline-block";
+  }
+
+  function onGeoError(err) {
+    var errEl = document.getElementById("track-error");
+    var msgs  = {
+      1: "Permission denied. Allow location access in browser settings.",
+      2: "Position unavailable. Enable GPS or location services.",
+      3: "GPS timed out. Will retry automatically.",
+    };
+    if (errEl) { errEl.textContent = msgs[err.code] || ("Geolocation error " + err.code); errEl.style.display = "block"; }
+    var badge = document.getElementById("track-badge");
+    if (badge) { badge.textContent = "Error"; badge.className = "track-badge badge overdue"; }
+  }
+
+  // ── Exposed API for dashboard page ──────────────────────────────────────
+  window.startTracking = function () {
+    if (state.tracking) return;
+    if (!navigator.geolocation) {
+      var w = document.getElementById("track-warn");
+      if (w) w.style.display = "block";
+      return;
+    }
+    state.tracking = true;
+
+    var badge    = document.getElementById("track-badge");
+    var btn      = document.getElementById("track-btn");
+    var statusEl = document.getElementById("track-status");
+    if (badge)    { badge.textContent = "Starting…"; badge.className = "track-badge badge partial"; }
+    if (btn)      { btn.textContent = "⏹ Stop Tracking"; btn.onclick = window.stopTracking; }
+    if (statusEl) { statusEl.textContent = "Requesting GPS permission…"; }
+
+    var opts = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
+    navigator.geolocation.getCurrentPosition(onPosition, onGeoError, opts);
+    state.watchId = navigator.geolocation.watchPosition(onPosition, onGeoError, opts);
+    state.intervalId = setInterval(function () {
+      if (state.lastPos) {
+        sendLocation(state.lastPos.coords.latitude, state.lastPos.coords.longitude,
+                     Math.round(state.lastPos.coords.accuracy), true);
+        var timeEl = document.getElementById("track-time");
+        if (timeEl) timeEl.textContent = new Date().toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+      } else {
+        navigator.geolocation.getCurrentPosition(onPosition, onGeoError, opts);
+      }
+    }, INTERVAL_MS);
+  };
+
+  window.stopTracking = function () {
+    state.tracking = false;
+    if (state.watchId    !== null) { navigator.geolocation.clearWatch(state.watchId); state.watchId = null; }
+    if (state.intervalId !== null) { clearInterval(state.intervalId); state.intervalId = null; }
+
+    var badge    = document.getElementById("track-badge");
+    var btn      = document.getElementById("track-btn");
+    var statusEl = document.getElementById("track-status");
+    var info     = document.getElementById("track-info");
+    var mapsEl   = document.getElementById("track-maps");
+    var navBadge = document.getElementById("nav-track-badge");
+    if (badge)    { badge.textContent = "Stopped"; badge.className = "track-badge badge upcoming"; }
+    if (btn)      { btn.textContent = "▶ Start Tracking"; btn.onclick = window.startTracking; }
+    if (statusEl) { statusEl.textContent = "Tracking stopped."; }
+    if (info)     { info.style.display = "none"; }
+    if (mapsEl)   { mapsEl.style.display = "none"; }
+    if (navBadge) { navBadge.style.display = "none"; }
+
+    if (state.lastPos) {
+      sendLocation(state.lastPos.coords.latitude, state.lastPos.coords.longitude,
+                   Math.round(state.lastPos.coords.accuracy), false);
+    }
+    state.lastPos = null;
+  };
+
+  // ── Send stop-tracking beacon before page closes ─────────────────────────
+  window.addEventListener("beforeunload", function () {
+    if (!state.tracking || !state.lastPos || !navigator.sendBeacon) return;
+    var csrf = getCsrfToken();
+    var fd = new FormData();
+    fd.append("csrfmiddlewaretoken", csrf);
+    fd.append("latitude",    state.lastPos.coords.latitude);
+    fd.append("longitude",   state.lastPos.coords.longitude);
+    fd.append("accuracy",    Math.round(state.lastPos.coords.accuracy));
+    fd.append("is_tracking", "false");
+    fd.append("_beacon",     "1");
+    navigator.sendBeacon(SUBMIT_URL, fd);
+  });
+
+  // ── Restore tracking state on navigation (if was tracking before) ────────
+  // Uses sessionStorage to persist tracking state across page navigations.
+  var wasTracking = sessionStorage.getItem("sfcTracking") === "1";
+  if (wasTracking) {
+    // Defer to next tick so page UI is ready
+    setTimeout(window.startTracking, 500);
+  }
+
+  // Persist tracking state on nav
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest("a");
+    if (a && !a.target && state.tracking) {
+      sessionStorage.setItem("sfcTracking", "1");
+    }
+  });
+
+  window.addEventListener("beforeunload", function () {
+    if (state.tracking) {
+      sessionStorage.setItem("sfcTracking", "1");
+    } else {
+      sessionStorage.removeItem("sfcTracking");
+    }
+  });
+
+}());
+</script>
+{% endblock %}

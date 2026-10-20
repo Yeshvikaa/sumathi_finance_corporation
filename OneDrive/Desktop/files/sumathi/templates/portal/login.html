@@ -1,0 +1,26 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Login · {{ site.company_name }}{% endblock %}
+{% block content %}
+<section class="wrap auth-wrap">
+  <div class="auth-card card">
+    <h1 class="auth-title">Customer Portal</h1>
+    <p class="auth-sub">Login with your SFC ID or username</p>
+    {% if messages %}{% for m in messages %}<div class="flash {{ m.tags }}">{{ m }}</div>{% endfor %}{% endif %}
+    <form method="post" class="auth-form">
+      {% csrf_token %}
+      {% for f in form %}
+        <div class="field">
+          <label>{{ f.label }}</label>
+          {{ f }}
+          {% if f.errors %}<p class="field-err">{{ f.errors|join:", " }}</p>{% endif %}
+        </div>
+      {% endfor %}
+      {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+      <button type="submit" class="btn wide">Login</button>
+    </form>
+    <p class="auth-links">New customer? <a href="{% url 'register_customer' %}">Register here</a></p>
+    <p class="auth-links">Joining as staff? <a href="{% url 'register_staff_request' %}">Request access</a></p>
+    <p class="auth-links muted"><a href="{% url 'login' %}">Staff / manager login →</a></p>
+  </div>
+</section>
+{% endblock %}

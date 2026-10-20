@@ -1,0 +1,9 @@
+{% extends "manage/base_manage.html" %}
+{% block content %}<h1>Payments</h1>
+<div class="bar tabs">
+<a class="btn {% if f == 'overdue' %}gold{% endif %}" href="?f=overdue">Overdue</a>
+<a class="btn {% if f == 'today' %}gold{% endif %}" href="?f=today">Due today</a>
+<a class="btn {% if f == 'week' %}gold{% endif %}" href="?f=week">Next 7 days</a>
+<a class="btn {% if f == 'all' %}gold{% endif %}" href="?f=all">All unpaid</a>
+<a class="btn {% if f == 'paid' %}gold{% endif %}" href="?f=paid">Paid</a></div>
+<div class="card scroll"><table><tr><th>Customer</th><th>#</th><th>Due</th><th>Balance</th><th>Status</th><th></th></tr>{% include "manage/_rows.html" %}</table></div>{% endblock %}

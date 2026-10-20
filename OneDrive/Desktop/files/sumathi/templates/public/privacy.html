@@ -1,0 +1,38 @@
+{% extends "public/base_public.html" %}
+{% block title %}Privacy Policy · {{ site.company_name }}{% endblock %}
+{% block content %}
+<section class="hero sm">
+  <div class="wrap hero-in">
+    <h1>Privacy Policy</h1>
+    <p class="lead">Last updated: January 2025</p>
+  </div>
+</section>
+<div class="legal wrap">
+  <h2>1. Information We Collect</h2>
+  <p>We collect personal information that you provide directly when you apply for a loan, contact us, or use our customer portal. This may include your full name, mobile number, email address, residential address, identity document details, and financial information.</p>
+
+  <h2>2. How We Use Your Information</h2>
+  <p>Your information is used exclusively for:</p>
+  <ul>
+    <li>Processing your loan application and verifying your identity</li>
+    <li>Communicating with you about your application and repayments</li>
+    <li>Maintaining accurate financial records as required by law</li>
+    <li>Sending payment reminders (via phone/WhatsApp)</li>
+  </ul>
+
+  <h2>3. Information Sharing</h2>
+  <p>We do not sell, trade, or rent your personal information to any third party. Your data is shared only with our authorised staff who are directly involved in processing your loan.</p>
+
+  <h2>4. Data Security</h2>
+  <p>All data is stored securely on protected systems. Uploaded documents are stored in private, non-public server directories and can only be accessed by authorised staff or the document owner through the portal.</p>
+
+  <h2>5. Cookies & Portal Usage</h2>
+  <p>Our customer portal uses session cookies to keep you logged in. No tracking or advertising cookies are used. You may disable cookies in your browser settings, though this will affect portal functionality.</p>
+
+  <h2>6. Your Rights</h2>
+  <p>You may request access to, correction of, or deletion of your personal data by contacting us directly. We will respond to all requests within a reasonable time period.</p>
+
+  <h2>7. Contact</h2>
+  <p>For any privacy-related queries, please contact us at <a href="mailto:{{ site.email }}">{{ site.email }}</a> or visit our office.</p>
+</div>
+{% endblock %}

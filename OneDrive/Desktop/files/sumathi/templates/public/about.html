@@ -1,0 +1,50 @@
+{% extends "public/base_public.html" %}
+{% block title %}About Us · {{ site.company_name }}{% endblock %}
+{% block desc %}Learn about {{ site.company_name }}, our history, mission, and the policies that guide our lending practice.{% endblock %}
+{% block content %}
+<section class="hero sm">
+  <div class="wrap hero-in">
+    <p class="eyebrow">Our story</p>
+    <h1>About {{ site.company_name }}</h1>
+    <p class="lead">Trusted finance for families and small businesses since {{ site.founded_year }}.</p>
+  </div>
+</section>
+
+<section class="wrap" style="padding-top:40px">
+  <div class="grid2">
+    <div>
+      <h2 class="sec">Who we are</h2>
+      <p class="lead dark">{{ site.about|linebreaksbr }}</p>
+      {% if site.phone %}
+      <div class="cta" style="margin-top:24px">
+        <a href="tel:{{ site.phone }}" class="btn">Call {{ site.phone }}</a>
+        {% if site.whatsapp %}<a href="https://wa.me/{{ site.whatsapp }}" class="btn gold">WhatsApp us</a>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    <div>
+      <div class="card" style="background:var(--cream2)">
+        <h3>Quick facts</h3>
+        <div class="stats" style="margin-top:0">
+          <div class="stat"><b>{{ site.founded_year }}</b><span>Year founded</span></div>
+          <div class="stat"><b>6</b><span>Days a week</span></div>
+        </div>
+        {% if site.address %}<p style="margin-top:16px"><b>Office:</b> {{ site.address }}</p>{% endif %}
+        {% if site.email %}<p><b>Email:</b> <a href="mailto:{{ site.email }}">{{ site.email }}</a></p>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if policies %}
+<section class="wrap" style="padding-bottom:60px">
+  <h2 class="sec">Company Policies</h2>
+  {% for p in policies %}
+  <details class="card pol"{% if forloop.first %} open{% endif %}>
+    <summary>{{ p.title }}</summary>
+    <p style="margin-top:10px;color:var(--mut)">{{ p.body|linebreaksbr }}</p>
+  </details>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}

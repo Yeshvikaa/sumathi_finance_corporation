@@ -1,0 +1,57 @@
+{% extends "public/base_public.html" %}
+{% block title %}FAQ · {{ site.company_name }}{% endblock %}
+{% block desc %}Frequently asked questions about loans, repayment, eligibility, and the customer portal at {{ site.company_name }}.{% endblock %}
+{% block content %}
+<section class="hero sm">
+  <div class="wrap hero-in">
+    <p class="eyebrow">Got questions?</p>
+    <h1>Frequently Asked Questions</h1>
+    <p class="lead">Find answers to our most common questions below.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  {% if faqs %}
+  <div class="faq-list">
+    {% for faq in faqs %}
+    <details class="faq-item">
+      <summary>{{ faq.question }}</summary>
+      <div class="faq-answer">{{ faq.answer|linebreaksbr }}</div>
+    </details>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary>Who is eligible to apply for a loan?</summary>
+      <div class="faq-answer">Any resident individual or small business owner with a valid identity proof and a stable source of income may apply. Our team evaluates each application individually.</div>
+    </details>
+    <details class="faq-item">
+      <summary>What documents are required?</summary>
+      <div class="faq-answer">You will need a valid identity proof (Aadhaar / Driving Licence / Passport), a recent photograph, and proof of address. Additional documents such as salary slips may be requested based on the loan amount.</div>
+    </details>
+    <details class="faq-item">
+      <summary>How quickly will my loan be approved?</summary>
+      <div class="faq-answer">Most applications are reviewed within 48 hours of complete document submission. You will be notified of the outcome through the portal and via phone.</div>
+    </details>
+    <details class="faq-item">
+      <summary>What repayment options are available?</summary>
+      <div class="faq-answer">We offer daily, weekly, and monthly repayment schedules. The frequency is agreed upon during approval based on your income cycle.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Can I pay using UPI or bank transfer?</summary>
+      <div class="faq-answer">Yes. We accept cash, UPI, and bank transfers. Digital payments must be submitted as a claim through the portal or WhatsApp and will be verified by our team.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Is my personal information kept confidential?</summary>
+      <div class="faq-answer">Absolutely. Your information is used solely for loan processing and is never shared with third parties. Please read our Privacy Policy for full details.</div>
+    </details>
+    <details class="faq-item">
+      <summary>How do I track my application status?</summary>
+      <div class="faq-answer">Register on our customer portal, submit your application, and you can view real-time status updates including reviewer notes at any time.</div>
+    </details>
+  </div>
+  {% endif %}
+  <p style="text-align:center;margin-top:32px">Still have questions? <a href="{% url 'contact' %}">Contact us →</a></p>
+</section>
+{% endblock %}

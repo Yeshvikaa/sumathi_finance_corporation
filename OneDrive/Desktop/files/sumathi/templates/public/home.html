@@ -1,0 +1,25 @@
+{% extends "public/base_public.html" %}
+{% block content %}
+<section class="hero"><div class="wrap hero-in">
+  <p class="eyebrow">Since {{ site.founded_year }}</p>
+  <h1>{{ site.company_name }}</h1>
+  <p class="lead">{{ site.tagline }}</p>
+  <div class="cta"><a class="btn gold" href="{% url 'contact' %}">Talk to us</a>
+  {% if site.phone %}<a class="btn ghost" href="tel:{{ site.phone }}">Call {{ site.phone }}</a>{% endif %}</div>
+</div></section>
+<section class="wrap stats">
+  <div class="stat"><b>{{ years_of_service }}+</b><span>Years of service</span></div>
+  <div class="stat"><b>{{ total_customers }}</b><span>Customers served</span></div>
+  <div class="stat"><b>{{ total_loans }}</b><span>Loans managed</span></div>
+</section>
+<section class="wrap grid2">
+  <div class="card"><h2>Office hours</h2>{% for l in site.hours_list %}<p class="row">{{ l }}</p>{% endfor %}
+    <h2 class="mt">Find us</h2><p>{{ site.address|linebreaksbr }}</p>
+    {% if site.phone %}<p><b>Phone:</b> <a href="tel:{{ site.phone }}">{{ site.phone }}</a></p>{% endif %}
+    {% if site.whatsapp %}<p><a class="btn sm" href="https://wa.me/{{ site.whatsapp }}">WhatsApp us</a></p>{% endif %}</div>
+  <div>{% include "public/_map.html" %}</div>
+</section>
+{% if policies %}<section class="wrap"><h2 class="sec">Our commitments</h2><div class="grid3">
+  {% for p in policies %}<div class="card"><h3>{{ p.title }}</h3><p>{{ p.body|truncatewords:28 }}</p></div>{% endfor %}
+</div><p><a href="{% url 'about' %}">Read all policies →</a></p></section>{% endif %}
+{% endblock %}

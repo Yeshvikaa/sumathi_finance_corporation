@@ -1,0 +1,6 @@
+{% for i in items %}<tr>
+<td><a href="{% url 'customer_detail' i.loan.customer.id %}">{{ i.loan.customer.name }}</a><br><small>{{ i.loan.customer.phone }}</small></td>
+<td>#{{ i.number }}</td><td>{{ i.due_date|date:"d M Y" }}</td><td>₹{{ i.balance }}</td>
+<td><span class="badge {{ i.status }}">{{ i.status|title }}</span></td>
+<td>{% if not i.paid_on %}{% include "manage/_pay.html" %}{% endif %}</td></tr>
+{% empty %}<tr><td colspan="6" class="empty">Nothing here.</td></tr>{% endfor %}

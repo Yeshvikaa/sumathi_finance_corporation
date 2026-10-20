@@ -1,0 +1,24 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Apply for Loan · {{ site.company_name }}{% endblock %}
+{% block content %}
+<section class="wrap">
+  <a href="{% url 'portal_dashboard' %}" class="back-link">← Back to portal</a>
+  <div class="card" style="max-width:720px;margin:1.5rem auto">
+    <h1>Loan Application</h1>
+    <p class="muted">Fill all fields. Upload required documents after submission.</p>
+    <form method="post" enctype="multipart/form-data" class="auth-form" id="applyForm">
+      {% csrf_token %}
+      {% for f in form %}
+        <div class="field">
+          <label>{{ f.label }}{% if f.field.required %}<span class="req">*</span>{% endif %}</label>
+          {{ f }}
+          {% if f.help_text %}<p class="field-hint">{{ f.help_text }}</p>{% endif %}
+          {% if f.errors %}<p class="field-err">{{ f.errors|join:", " }}</p>{% endif %}
+        </div>
+      {% endfor %}
+      <hr style="margin:1.5rem 0">
+      <button type="submit" class="btn wide">Submit Application</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "public/base_public.html" %}
+{% block title %}Services · {{ site.company_name }}{% endblock %}
+{% block desc %}Explore {{ site.company_name }}'s personal loan, business finance, and flexible repayment services.{% endblock %}
+{% block content %}
+<section class="hero sm">
+  <div class="wrap hero-in">
+    <p class="eyebrow">What we offer</p>
+    <h1>Our Services</h1>
+    <p class="lead">Reliable, transparent financial solutions for individuals and businesses.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">💰</div>
+      <h3>Personal Loans</h3>
+      <p>Quick personal loans for medical emergencies, education, home improvements, and daily needs — with flexible tenure and minimal paperwork.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🏪</div>
+      <h3>Business Finance</h3>
+      <p>Working capital loans and short-term business credit for small traders, shopkeepers, and entrepreneurs to grow their ventures.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">📅</div>
+      <h3>Flexible Repayment</h3>
+      <p>Choose from daily, weekly, or monthly installment schedules that match your income cycle — no hidden fees, no surprises.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🤝</div>
+      <h3>Doorstep Service</h3>
+      <p>Our staff visits your home or business for document collection and repayment collection at no extra cost to you.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">📱</div>
+      <h3>Online Portal</h3>
+      <p>Apply for loans, track your application status, and view your repayment schedule securely through our customer portal.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔒</div>
+      <h3>Secure & Trusted</h3>
+      <p>Over {{ site.founded_year }} years of trusted service. Your data and transactions are handled with strict confidentiality and security.</p>
+    </div>
+  </div>
+</section>
+
+<section class="process-section">
+  <div class="wrap">
+    <h2>How It Works</h2>
+    <div class="process-grid">
+      <div class="process-step">
+        <div class="step-num">1</div>
+        <h3>Apply Online</h3>
+        <p>Register on our portal and submit your loan application with basic details.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">2</div>
+        <h3>Document Verification</h3>
+        <p>Our team reviews your application and verifies submitted documents promptly.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">3</div>
+        <h3>Approval</h3>
+        <p>Receive approval notification. Our staff will contact you to finalise details.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num">4</div>
+        <h3>Disbursement</h3>
+        <p>Funds are disbursed and your repayment schedule begins as agreed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="why-section">
+  <div class="wrap">
+    <h2 class="sec" style="text-align:center">Why Choose {{ site.company_name }}</h2>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">⚡</div>
+        <h3>Fast Processing</h3>
+        <p>Applications reviewed within 48 hours of document submission.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📊</div>
+        <h3>Transparent Terms</h3>
+        <p>No hidden charges. All interest and fees are clearly disclosed upfront.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🌟</div>
+        <h3>Established Trust</h3>
+        <p>Serving families and businesses since {{ site.founded_year }} with integrity.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📞</div>
+        <h3>Dedicated Support</h3>
+        <p>Our team is reachable six days a week for any queries or support.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="cta-banner">
+    <h2>Ready to get started?</h2>
+    <p>Apply online or visit our office — we'll be glad to help.</p>
+    <div class="cta" style="justify-content:center">
+      <a href="{% url 'register_customer' %}" class="btn gold">Apply Online</a>
+      <a href="{% url 'contact' %}" class="btn ghost">Contact Us</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

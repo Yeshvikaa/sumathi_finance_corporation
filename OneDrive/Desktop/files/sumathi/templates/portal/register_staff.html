@@ -1,0 +1,22 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Staff Access Request · {{ site.company_name }}{% endblock %}
+{% block content %}
+<section class="wrap auth-wrap">
+  <div class="auth-card card">
+    <h1 class="auth-title">Request Staff Access</h1>
+    <p class="auth-sub">Your account will be reviewed and activated by a manager.</p>
+    <form method="post" class="auth-form">
+      {% csrf_token %}
+      {% for f in form %}
+        <div class="field">
+          <label>{{ f.label }}{% if f.field.required %}<span class="req">*</span>{% endif %}</label>
+          {{ f }}
+          {% if f.errors %}<p class="field-err">{{ f.errors|join:", " }}</p>{% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn wide">Submit request</button>
+    </form>
+    <p class="auth-links">Already registered? <a href="{% url 'portal_login' %}">Login</a></p>
+  </div>
+</section>
+{% endblock %}

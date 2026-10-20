@@ -1,0 +1,15 @@
+{% load static %}<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{{ site.company_name }}{% endblock %}</title>
+<meta name="description" content="{% block desc %}{{ site.tagline }} Visit us at {{ site.address|truncatechars:80 }}.{% endblock %}">
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+<meta property="og:title" content="{{ site.company_name }}"><meta property="og:description" content="{{ site.tagline }}"><meta property="og:type" content="website">
+<meta name="theme-color" content="#0f3d2e">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/site.css' %}">
+{% block head %}{% endblock %}
+</head><body class="{% block body_class %}{% endblock %}">
+{% block body %}{% endblock %}
+</body></html>

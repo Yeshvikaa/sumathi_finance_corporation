@@ -1,0 +1,3 @@
+{% extends "manage/base_manage.html" %}
+{% block content %}<h1>Website enquiries</h1>{% for e in items %}<div class="card"><b>{{ e.name }}</b> · <a href="tel:{{ e.phone }}">{{ e.phone }}</a> · <small>{{ e.created|date:"d M Y, H:i" }}</small><p>{{ e.message|linebreaksbr }}</p>
+{% if e.handled %}<span class="badge paid">Handled</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="id" value="{{ e.id }}"><button class="btn sm">Mark handled</button></form>{% endif %}</div>{% empty %}<p class="empty">No enquiries yet.</p>{% endfor %}{% endblock %}

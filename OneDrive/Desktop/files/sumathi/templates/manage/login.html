@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Staff login · {{ site.company_name }}{% endblock %}
+{% block body_class %}app{% endblock %}
+{% block body %}<main class="login card"><h2>{{ site.company_name }}</h2><p>Staff sign in</p>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn gold">Sign in</button></form></main>{% endblock %}
