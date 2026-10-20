@@ -1,4 +1,3 @@
-```python
 import os
 from pathlib import Path
 
@@ -104,4 +103,3 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-```
